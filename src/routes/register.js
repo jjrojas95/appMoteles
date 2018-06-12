@@ -15,8 +15,7 @@ router.post('/register', (req,res) => {
     email: req.body.email,
     username: req.body.username,
     password: req.body.password,
-    activate: true,
-    role: 'Super Admin'
+    role: 'user'
   });
 
   User.addUser(newUser, (err, user) => {
