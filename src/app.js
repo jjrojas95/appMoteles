@@ -11,6 +11,7 @@ require('dotenv').config();
 // routes
 const placesRoutes = require('./routes/places');
 const registerRoutes = require('./routes/register');
+const loginRoutes = require('./routes/login');
 
 
 // Puerto e IP deploy
@@ -55,7 +56,10 @@ require('./config/passport')(passport);
 // Places routes
 app.use('/places', placesRoutes);
 // Register routes
-app.use('/', registerRoutes);
+app.use('/register', registerRoutes);
+// Login routes
+app.use('/', loginRoutes);
+
 
 
 // Index route
