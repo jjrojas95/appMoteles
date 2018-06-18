@@ -102,3 +102,38 @@ module.exports.sendNewToken = (token, updatedUser, host, done) => {
     done(err, updatedUser.email);
   });
 }
+
+module.exports.updatedResetTokenAndExpire = (token, user, host, done) => {
+
+  user.passResetExpires= Date.now() + 3600000;
+
+  User.findByIdAndUpdate(user._id, {
+    passResetToken: token,
+    passResetExpires: user.passResetExpires
+  }, (err, updatedUser) => {
+    done(err,token,updatedUser,host);
+  });
+};
+
+module.exports.sendResetToken = (token, updatedUser, host, done) => {
+  var smtpTransport = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: 'jjrojas95a@gmail.com',
+      pass: process.env.SENDER_PASS
+    }
+  });
+  var mailOptions = {
+    to: updatedUser.email,
+    from: 'jjrojas95a@gmail.com',
+    subject: 'Node.js Password Reset',
+    text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+      'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+      'http://' + host + '/reset/' + token + '\n\n' +
+      'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+  };
+  smtpTransport.sendMail(mailOptions, function(err) {
+    console.log('mail sent');
+    done(err, updatedUser.email);
+  });
+}

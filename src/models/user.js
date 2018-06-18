@@ -12,6 +12,8 @@ const UserSchema = new mongoose.Schema({
     activate: { type: Boolean, default: false},
     emailAuthToken: String,
     emailAuthExpires: Date,
+    passResetToken: String,
+    passResetExpires: Date,
     role: {
       type: String,
       enum: [ 'currentUser', 'adminPlace', 'moderator','admin' ],
@@ -30,12 +32,10 @@ module.exports.getUserById = (id,callback) => {
   User.findById(id,callback);
 };
 
-
 module.exports.getUserByUsername = (username,callback) => {
   let query = { username: username };
   User.find(query,callback);
 };
-
 
 module.exports.addUser = (newUser, callback) => {
   bcrypt.genSalt(10, (err, salt) => {
@@ -47,10 +47,24 @@ module.exports.addUser = (newUser, callback) => {
   });
 }
 
+module.exports.getUserByEmail = (email,callback) => {
+  let query = { email: email };
+  User.find(query,callback);
+};
+
 
 module.exports.comparePassword = (candidatePassword, hash, callback) => {
   bcrypt.compare(candidatePassword, hash, (err, isMatch) => {
     if (err) throw err;
     callback(null,isMatch);
+  });
+};
+
+module.exports.resetPassword = (user, callback) => {
+  bcrypt.genSalt( 10, (err,salt) => {
+    bcrypt.hash(user.password,salt, (err, hash) => {
+      if(err) throw err;
+      User.findByIdAndUpdate(user._id, {password: hash}, callback);
+    });
   });
 };

@@ -35,6 +35,7 @@ const app = express();
 
 
 // CORS Middleware
+
 app.use(cors());
 
 
@@ -50,6 +51,9 @@ app.use( bodyParser.json() );
 app.use(passport.initialize());
 app.use(passport.session());
 
+
+
+
 require('./config/passport')(passport);
 
 
@@ -58,7 +62,7 @@ app.use('/places', placesRoutes);
 // Register routes
 app.use('/register', registerRoutes);
 // Login routes
-app.use('/', loginRoutes);
+app.use('', loginRoutes);
 
 
 
@@ -66,7 +70,6 @@ app.use('/', loginRoutes);
 app.get('/',(req,res) => {
   res.send('QUESO!!!');
 });
-
 
 // Inicio servidor
 app.listen(port, ip, () => {
