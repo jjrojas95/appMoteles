@@ -12,6 +12,7 @@ require('dotenv').config();
 const placesRoutes = require('./routes/places');
 const registerRoutes = require('./routes/register');
 const loginRoutes = require('./routes/login');
+const resetRoutes = require('./routes/resetPassword');
 
 
 // Puerto e IP deploy
@@ -63,6 +64,9 @@ app.use('/places', placesRoutes);
 app.use('/register', registerRoutes);
 // Login routes
 app.use('', loginRoutes);
+// Reset password routes
+app.use('/reset', resetRoutes);
+
 
 
 

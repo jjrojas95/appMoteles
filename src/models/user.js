@@ -34,7 +34,7 @@ module.exports.getUserById = (id,callback) => {
 
 module.exports.getUserByUsername = (username,callback) => {
   let query = { username: username };
-  User.find(query,callback);
+  User.findOne(query,callback);
 };
 
 module.exports.addUser = (newUser, callback) => {
@@ -49,7 +49,7 @@ module.exports.addUser = (newUser, callback) => {
 
 module.exports.getUserByEmail = (email,callback) => {
   let query = { email: email };
-  User.find(query,callback);
+  User.findOne(query,callback);
 };
 
 
