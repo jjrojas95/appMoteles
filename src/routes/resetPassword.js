@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const async = require("async");
+
+//controllers
 const emailSenderCtrl = require('../controllers/emailSenderController');
 
 
@@ -51,7 +53,8 @@ router.get('/:token', (req,res) => {
       });
 });
 
-router.post('/:token', (req, res) => {
+// Updated Route
+router.put('/:token', (req, res) => {
 
   User.findOne({
     passResetToken: req.params.token,

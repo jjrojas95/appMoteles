@@ -13,6 +13,8 @@ const placesRoutes = require('./routes/places');
 const registerRoutes = require('./routes/register');
 const loginRoutes = require('./routes/login');
 const resetRoutes = require('./routes/resetPassword');
+const registerAdminRoutes = require('./routes/registerAdmin');
+
 
 
 // Puerto e IP deploy
@@ -58,6 +60,7 @@ app.use(passport.session());
 require('./config/passport')(passport);
 
 
+app.use('/register/admin', registerAdminRoutes);
 // Places routes
 app.use('/places', placesRoutes);
 // Register routes
@@ -66,6 +69,7 @@ app.use('/register', registerRoutes);
 app.use('', loginRoutes);
 // Reset password routes
 app.use('/reset', resetRoutes);
+
 
 
 
