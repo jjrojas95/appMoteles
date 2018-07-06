@@ -7,6 +7,7 @@ const passport = require('passport');
 //controllers
 const authCtrl = require('../controllers/authController');
 const emailSenderRegisterAdminRouteCtrl = require('../controllers/emailSenderRegisterAdmin');
+const emailSenderCtrl = require('../controllers/emailSenderController');
 
 
 
@@ -39,5 +40,42 @@ router.post('',passport.authenticate('jwt', {session:false}),
                 }
               }
 });
+
+router.get('/:token', (req,res) => {
+  User.findOne({ emailAuthToken: req.params.token }, (err, user) => {
+      if (err) return res.json({success: false, msg:`Something was wrong`})
+      if (!user) {
+        return res.json({success: false, msg: `User doesn't exist`});
+      }
+      if ( new Date(user.emailAuthExpires) < Date.now() ) {
+        async.waterfall([
+          emailSenderCtrl.generateTokenWhenExpire(user,req),
+          emailSenderCtrl.updatedTokenAndExpire,
+          emailSenderCtrl.sendNewToken,
+          function(email,done) {
+            res.json({success: false, msg: `An e-mail has been sent to ${email} with further instructions.`});
+            done(null,'done')
+          }
+        ], function(err) {
+          if (err) {
+            res.json({success: false, msg: `Failed generate token`});
+            return next(err);
+          }
+        });
+      }
+      else {
+        if (user.role === 'adminPlace') {
+          if(!user.place.firstGenerate) {
+            return res.json({success: false, msg: `you will use this token, edit in your profile`});
+          }
+          return res.json({success: true, msg: `validate Token`});
+        }
+        User.findByIdAndUpdate(user._id, {activate: true}, (err, updateUser) => {
+          return res.json({success: true, msg: `Activate Count`});
+        });
+      }
+  });
+});
+
 
 module.exports = router;

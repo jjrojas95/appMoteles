@@ -25,7 +25,7 @@ module.exports.generatePassAndToken = (req) => {
 };
 
 module.exports.addTokenAndUser = (request,done) => {
-    let role = request.adminPlace? 'adminPlace' : 'moderator';
+    let role = request.moderator? 'moderator':'adminPlace';
     let newUser = new User({
       name: request.name,
       email: request.email,

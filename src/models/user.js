@@ -18,6 +18,13 @@ const UserSchema = new mongoose.Schema({
       type: String,
       enum: [ 'currentUser', 'adminPlace', 'moderator','admin' ],
       default: 'currentUser'
+    },
+    place: {
+      id: {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: "Place"
+      },
+      firstGenerate:  { type: Boolean, default: true }
     }
 });
 

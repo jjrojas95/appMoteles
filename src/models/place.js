@@ -10,7 +10,9 @@ const PlaceSchema = new mongoose.Schema({
     image: { type: String, require:true },
     page: { type: String, require:true },
     description: { type: String, required: true },
+    roomStandard: {type: String, required: true},
     priceStandard: { type: Number, require: true },
+    descriptionStandard: { type: String, required: true },
     author: {
        id: {
           type: mongoose.Schema.Types.ObjectId,
