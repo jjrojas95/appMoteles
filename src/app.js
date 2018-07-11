@@ -5,6 +5,11 @@ const cors = require('cors');
 const passport = require('passport');
 const mongoose = require('mongoose');
 const config = require('./config/database');
+
+
+// Models
+const Place = require('./models/place');
+const User = require('./models/user');
 const Comment = require("./models/comment");
 
 require('dotenv').config();
@@ -16,6 +21,7 @@ const registerRoutes = require('./routes/register');
 const loginRoutes = require('./routes/login');
 const resetRoutes = require('./routes/resetPassword');
 const registerAdminRoutes = require('./routes/registerAdmin');
+const registerSuperAdminRoutes = require('./routes/registerSuperAdmin');
 
 
 
@@ -68,6 +74,8 @@ app.use('/places', placesRoutes);
 app.use('/register', registerRoutes);
 // Register admin route
 app.use('/register/admin', registerAdminRoutes);
+// Register SuperAdmin route
+app.use('/register/superAdmin', registerSuperAdminRoutes);
 // Login routes
 app.use('', loginRoutes);
 // Reset password routes

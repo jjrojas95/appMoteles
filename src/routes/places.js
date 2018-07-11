@@ -34,7 +34,6 @@ router.get('', (req,res) => {
 
 // Create Places Routes
 router.post('', (req,res) => {
-  console.log(req.query.token);
   if(!req.query.token) return res.json({success: false, msg: `Something was wrong`});
 
   User.findOne({ emailAuthToken: req.query.token }, (err, user) => {
@@ -48,21 +47,18 @@ router.post('', (req,res) => {
           emailSenderCtrl.updatedTokenAndExpire,
           emailSenderCtrl.sendNewToken,
           function(email,done) {
-            res.json({success: false, msg: `An e-mail has been sent to ${email} with further instructions.`});
-            done(null,'done')
+            done(null,email)
           }
-        ], function(err) {
-          if (err) {
-            res.json({success: false, msg: `Failed generate token`});
-            return next(err);
-          }
+        ], function(err, email) {
+          if (err) return res.json({success: false, msg: `Failed generate token`});
+          return res.json({success: false, msg: `An e-mail has been sent to ${email} with further instructions.`});
         });
       }
       else {
         if(!req.body.name || !req.body.lat || !req.body.lng || !req.body.image ||
            !req.body.page || !req.body.description || !req.body.description ||
            !req.body.roomStandard || !req.body.descriptionStandard ||
-           !req.body.priceStandard) {
+           !req.body.priceStandard || !req.body.direction) {
              return res.json({success: false, msg: `complete require info`});
         }
         if (!user.place.firstGenerate) return res.json({success: false, msg: `this token was used`});

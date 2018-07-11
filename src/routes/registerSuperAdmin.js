@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const async = require("async");
 const passport = require('passport');
+const config = require('../config/database');
 
 
 //controllers
@@ -15,28 +16,26 @@ const emailSenderCtrl = require('../controllers/emailSenderController');
 const User = require('../models/user');
 
 
-router.post('',passport.authenticate('jwt', {session:false}),
-            authCtrl.roleAuthorization(['admin']), (req,res) => {
+router.post('', (req,res) => {
               if(!req.body.email || !req.body.username || !req.body.name ||
-                (!req.body.adminPlace && !req.body.moderator)) {
+                 !req.body.secret) {
                   return res.json({success: false, msg: `completed info required`});
 
               } else {
-                if(req.body.adminPlace || req.body.moderator) {
+                if(req.body.secret == config.secret) {
                   async.waterfall([
                     emailSenderRegisterAdminRouteCtrl.generatePassAndToken(req),
-                    emailSenderRegisterAdminRouteCtrl.addTokenAndUser,
-                    emailSenderRegisterAdminRouteCtrl.sendEmail,
+                    emailSenderRegisterAdminRouteCtrl.addTokenAndAdminRole,
+                    emailSenderRegisterAdminRouteCtrl.sendEmailAdmin,
                     (email,done) => {
-                      res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
-                      done(null,'done')
+                      done(null,email)
                     }
-                  ], (err) => {
-                    if (err) {
-                      res.json({success: false, msg: `Failed generate token`});
-                      return next(err);
-                    }
+                  ], (err,email) => {
+                      if(email) return res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
+                      return res.json({success: false, msg: `Failed generate token`});
                   });
+                } else {
+                  return res.json({success:false, msg: `Not Secret`})
                 }
               }
 });
@@ -45,7 +44,7 @@ router.get('/:token', (req,res) => {
   User.findOne({ emailAuthToken: req.params.token }, (err, user) => {
       if (err) return res.json({success: false, msg:`Something was wrong`})
       if (!user) {
-        return res.json({success: false, msg: `User doesn't exist`});
+        return res.json({success: false, msg: `This token doesn't exist`});
       }
       if ( new Date(user.emailAuthExpires) < Date.now() ) {
         async.waterfall([
@@ -53,23 +52,14 @@ router.get('/:token', (req,res) => {
           emailSenderCtrl.updatedTokenAndExpire,
           emailSenderCtrl.sendNewToken,
           function(email,done) {
-            res.json({success: false, msg: `An e-mail has been sent to ${email} with further instructions.`});
-            done(null,'done')
+            done(null,email)
           }
-        ], function(err) {
-          if (err) {
-            res.json({success: false, msg: `Failed generate token`});
-            return next(err);
-          }
+        ], (err,email) => {
+          if (err) return res.json({success: false, msg: `Failed generate token`});
+          return res.json({success: false, msg: `An e-mail has been sent to ${email} with further instructions.`});
         });
       }
       else {
-        if (user.role === 'adminPlace') {
-          if(!user.place.firstGenerate) {
-            return res.json({success: false, msg: `you will use this token, edit in your profile`});
-          }
-          return res.json({success: true, msg: `validate Token`});
-        }
         User.findByIdAndUpdate(user._id, {activate: true}, (err, updateUser) => {
           return res.json({success: true, msg: `Activate Count`});
         });

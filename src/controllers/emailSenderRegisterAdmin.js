@@ -64,3 +64,43 @@ module.exports.sendEmail = (user,req,done) => {
       done(err, user.email);
     });
 };
+
+module.exports.addTokenAndAdminRole = (request,done) => {
+  let newUser = new User({
+    name: request.name,
+    email: request.email,
+    username: request.username,
+    password: request.password,
+    emailAuthToken: request.token,
+    emailAuthExpires: Date.now() + 3600000,
+    role: 'admin'
+  });
+
+  User.addUser(newUser, (err, user) => {
+    done(err,user,request);
+  });
+};
+
+module.exports.sendEmailAdmin = (user,req,done) => {
+  var smtpTransport = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'jjrojas95a@gmail.com',
+        pass: process.env.SENDER_PASS
+      }
+    });
+  var mailOptions = {
+      to: user.email,
+      from: 'jjrojas95a@gmail.com',
+      subject: 'Node.js Admin count',
+      text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+        'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+        'http://' + req.host + '/register/admin/' + user.emailAuthToken + '\n\n' +
+        'If you did not request this, please ignore this email and your password will remain unchanged.\n' +
+        'your pass is :' + req.password + '\n'
+    };
+    smtpTransport.sendMail(mailOptions, function(err) {
+      console.log('mail sent');
+      done(err, user.email);
+    });
+};

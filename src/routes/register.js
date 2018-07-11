@@ -22,14 +22,11 @@ router.post('/', (req,res) => {
     emailSenderCtrl.addTokenAndUser,
     emailSenderCtrl.sendEmail,
     function(email,done) {
-      res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
-      done(null,'done')
+      done(null,email)
     }
-  ], function(err) {
-    if (err) {
-      res.json({success: false, msg: `Failed generate token`});
-      return next(err);
-    }
+  ], function(err,email) {
+    if (err) return res.json({success: false, msg: `Failed generate token`});
+    return res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
   });
 });
 
@@ -47,14 +44,11 @@ router.get('/:token', (req, res) => {
         emailSenderCtrl.updatedTokenAndExpire,
         emailSenderCtrl.sendNewToken,
         function(email,done) {
-          res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
-          done(null,'done')
+          done(null,email)
         }
-      ], function(err) {
-        if (err) {
-          res.json({success: false, msg: `Failed generate token`});
-          return next(err);
-        }
+      ], function(err,email) {
+        if (err) return res.json({success: false, msg: `Failed generate token`});
+        return res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
       });
     } else {
       User.findByIdAndUpdate(user._id, {activate: true}, (err, updateUser) => {

@@ -23,13 +23,10 @@ router.post('',(req,res) => {
         emailSenderCtrl.updatedResetTokenAndExpire,
         emailSenderCtrl.sendResetToken,
         function(email,done) {
-          res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
-          done(null,'done')
-        }], (err) => {
-        if (err) {
-          res.json({success: false, msg: `Failed generate token`});
-          return next(err);
-        }
+          done(null,email)
+        }], (err,email) => {
+        if (err) return res.json({success: false, msg: `Failed generate token`});
+        return res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
       });
     }
   });
