@@ -5,6 +5,8 @@ const cors = require('cors');
 const passport = require('passport');
 const mongoose = require('mongoose');
 const config = require('./config/database');
+const Comment = require("./models/comment");
+
 require('dotenv').config();
 
 
@@ -60,11 +62,12 @@ app.use(passport.session());
 require('./config/passport')(passport);
 
 
-app.use('/register/admin', registerAdminRoutes);
 // Places routes
 app.use('/places', placesRoutes);
 // Register routes
 app.use('/register', registerRoutes);
+// Register admin route
+app.use('/register/admin', registerAdminRoutes);
 // Login routes
 app.use('', loginRoutes);
 // Reset password routes

@@ -12,11 +12,23 @@ const User = require('../models/user');
 
 // Index Places Route
 router.get('', (req,res) => {
-  if(req.query.lat && req.query.lat) {
-
-  }
-  if(req.query.name) {
-
+  if(req.query.lat1 && req.query.lat2 && req.query.lng1 && req.query.lng2) {
+    Place.find({
+                  lat: { $gt: req.query.lat1, $lt: req.query.lat2 },
+                  lng: { $gt: req.query.lng1, $lt: req.query.lng2 }
+                }).populate('author.id','activate')
+                .populate('comments').exec(
+                  (err,places) => {
+                  if(err) return res.json({success: false, msg: `Something was wrong` });
+                  if(!places) return res.json({success: true, places: null});
+                  let activatePlaces = [];
+                  places.forEach((place) => {
+                    if(Boolean(place.author.id.activate) == true) {
+                      activatePlaces.push(place);
+                    }
+                  });
+                  return res.json({success: true, places: activatePlaces});
+                });
   }
 });
 
