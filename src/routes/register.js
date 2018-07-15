@@ -34,10 +34,8 @@ router.post('/', (req,res) => {
 router.get('/:token', (req, res) => {
 
   User.findOne({ emailAuthToken: req.params.token }, (err, user) => {
-
-    if (!user) {
-      return res.json({success: false, msg: `User doesn't exist`});
-    }
+    if (!user) return res.json({success: false, msg: `User doesn't exist`});
+    if (use.role !== 'currentUser') return res.json({success: false, msg: `you can't use this route for activate this tipe of count`});
     if ( new Date(user.emailAuthExpires) < Date.now() ) {
       async.waterfall([
         emailSenderCtrl.generateTokenWhenExpire(user,req),

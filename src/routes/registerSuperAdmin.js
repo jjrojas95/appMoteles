@@ -50,7 +50,7 @@ router.get('/:token', (req,res) => {
         async.waterfall([
           emailSenderCtrl.generateTokenWhenExpire(user,req),
           emailSenderCtrl.updatedTokenAndExpire,
-          emailSenderCtrl.sendNewToken,
+          emailSenderCtrl.sendNewTokenAdminRoute,
           function(email,done) {
             done(null,email)
           }

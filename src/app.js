@@ -17,6 +17,7 @@ require('dotenv').config();
 
 // routes
 const placesRoutes = require('./routes/places');
+const placesAPIRoutes = require('./routes/placesAPI');
 const registerRoutes = require('./routes/register');
 const loginRoutes = require('./routes/login');
 const resetRoutes = require('./routes/resetPassword');
@@ -70,6 +71,8 @@ require('./config/passport')(passport);
 
 // Places routes
 app.use('/places', placesRoutes);
+//Places API Route
+app.use('/places/:id', placesAPIRoutes);
 // Register routes
 app.use('/register', registerRoutes);
 // Register admin route

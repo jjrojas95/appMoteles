@@ -10,10 +10,14 @@ const PlaceSchema = new mongoose.Schema({
     image: { type: String, require:true },
     page: { type: String, require:true },
     direction: { type: String, require:true },
+    country: { type: String, require:true },
+    province: { type: String, require:true },
+    city: { type: String, require:true },
     description: { type: String, required: true },
     roomStandard: {type: String, required: true},
     priceStandard: { type: Number, require: true },
     descriptionStandard: { type: String, required: true },
+    calification: { type: Number, default: 0},
     author: {
        id: {
           type: mongoose.Schema.Types.ObjectId,
@@ -25,6 +29,16 @@ const PlaceSchema = new mongoose.Schema({
        {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Comment"
+       }
+    ],
+    like: [
+       {
+          type: String
+       }
+    ],
+    dislike: [
+       {
+          type: String
        }
     ]
 });

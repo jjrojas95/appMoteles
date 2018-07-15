@@ -4,6 +4,7 @@ const async = require("async");
 
 
 const emailSenderCtrl = require('../controllers/emailSenderController');
+const fuzzySearch = require('../controllers/fuzzySearch');
 
 
 const Place = require('../models/place');
@@ -12,8 +13,16 @@ const User = require('../models/user');
 
 // Index Places Route
 router.get('', (req,res) => {
+  if (req.query.searchPlace) {
+    const regex = new RegExp(escapeRegex(req.query.searchPlace), 'gi');
+       Place.find({ "name": regex }, function(err, foundPlace) {
+           if(err) return res.json({success: false, msg: `Something was wrong` });
+           if(!foundPlace) return res.json({success: true, places: null });
+           return res.json({success: true, places: foundPlace });
+       });
+  }
   if(req.query.lat1 && req.query.lat2 && req.query.lng1 && req.query.lng2) {
-    Place.find({
+    return Place.find({
                   lat: { $gt: req.query.lat1, $lt: req.query.lat2 },
                   lng: { $gt: req.query.lng1, $lt: req.query.lng2 }
                 }).populate('author.id','activate')
@@ -38,9 +47,8 @@ router.post('', (req,res) => {
 
   User.findOne({ emailAuthToken: req.query.token }, (err, user) => {
       if (err) return res.json({success: false, msg:`Something was wrong`})
-      if (!user) {
-        return res.json({success: false, msg: `User doesn't exist`});
-      }
+      if (!user) return res.json({success: false, msg: `User doesn't exist`});
+      if (!user.place.firstGenerate) return res.json({success: false, msg: `this token was used`});
       if ( new Date(user.emailAuthExpires) < Date.now() ) {
         async.waterfall([
           emailSenderCtrl.generateTokenWhenExpire(user,req),
@@ -58,11 +66,11 @@ router.post('', (req,res) => {
         if(!req.body.name || !req.body.lat || !req.body.lng || !req.body.image ||
            !req.body.page || !req.body.description || !req.body.description ||
            !req.body.roomStandard || !req.body.descriptionStandard ||
-           !req.body.priceStandard || !req.body.direction) {
+           !req.body.priceStandard || !req.body.direction || !req.body.country ||
+           !req.body.province || !req.body.city) {
              return res.json({success: false, msg: `complete require info`});
         }
-        if (!user.place.firstGenerate) return res.json({success: false, msg: `this token was used`});
-        if (user.role == 'adminPlace' && user.place.firstGenerate) {
+        if (user.role == 'adminPlace') {
           Place.create(req.body, (err,newPlace) => {
             if(err) return res.json({success: false, msg: `Something was wrong`});
             newPlace.author.id = user._id;
@@ -75,7 +83,6 @@ router.post('', (req,res) => {
             return res.json({success: true, msg: `activate admin count`});
           });
         }
-
       }
   });
 });

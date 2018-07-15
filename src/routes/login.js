@@ -16,10 +16,8 @@ router.post('/login', (req,res) => {
   let password = req.body.password;
 
   User.getUserByUsername(username, (err,user) => {
-    if (err) throw err;
-    if (!user) {
-      return res.json({succes: false, msg: 'User not found'});
-    }
+    if (err) return res.json({succes: false, msg: 'Something was wrong'});
+    if (!user) return res.json({succes: false, msg: 'User not found'});
     User.comparePassword( password, user.password, (err,isMatch) => {
       if (err) throw err;
       if (isMatch && user.activate) {
@@ -30,6 +28,7 @@ router.post('/login', (req,res) => {
           success: true,
           token: `Bearer ${token}`,
           user: {
+            id: user._id,
             name: user.name,
             username: user.username,
             email: user.email,
