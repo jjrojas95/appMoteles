@@ -12,10 +12,10 @@ const User = require('../models/user');
 
 
 router.post('/login', (req,res) => {
-  let username = req.body.username;
+  let email = req.body.email;
   let password = req.body.password;
 
-  User.getUserByUsername(username, (err,user) => {
+  User.getUserByEmail(email, (err,user) => {
     if (err) return res.json({succes: false, msg: 'Something was wrong'});
     if (!user) return res.json({succes: false, msg: 'User not found'});
     User.comparePassword( password, user.password, (err,isMatch) => {
