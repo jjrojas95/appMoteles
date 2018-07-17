@@ -23,6 +23,7 @@ const loginRoutes = require('./routes/login');
 const resetRoutes = require('./routes/resetPassword');
 const registerAdminRoutes = require('./routes/registerAdmin');
 const registerSuperAdminRoutes = require('./routes/registerSuperAdmin');
+const commentRoutes = require('./routes/comment');
 
 
 
@@ -69,10 +70,12 @@ app.use(passport.session());
 require('./config/passport')(passport);
 
 
-// Places routes
+//Places routes
 app.use('/places', placesRoutes);
 //Places API Route
 app.use('/places/:id', placesAPIRoutes);
+//comment places route
+app.use('/places/:id/comment', commentRoutes);
 // Register routes
 app.use('/register', registerRoutes);
 // Register admin route
