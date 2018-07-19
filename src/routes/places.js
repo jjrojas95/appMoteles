@@ -3,6 +3,9 @@ const router = express.Router();
 const async = require("async");
 
 
+const opcPage = require('../config/opcPage');
+
+
 const emailSenderCtrl = require('../controllers/emailSenderController');
 const fuzzySearch = require('../controllers/fuzzySearch');
 
@@ -14,19 +17,31 @@ const User = require('../models/user');
 // Index Places Route
 router.get('', (req,res) => {
   if (req.query.searchPlace) {
-    const regex = new RegExp(escapeRegex(req.query.searchPlace), 'gi');
-       Place.find({ "name": regex }, function(err, foundPlace) {
-           if(err) return res.json({success: false, msg: `Something was wrong` });
-           if(!foundPlace) return res.json({success: true, places: null });
-           return res.json({success: true, places: foundPlace });
-       });
+    let searchPlace = fuzzySearch.escapeRegex(req.query.searchPlace.toString());
+    let page = req.query.page? Number(req.query.page) : 1;
+    const regex = new RegExp(searchPlace, 'gi');
+    return Place.count({ name: regex })
+           .exec((er, count) => {
+            if (er) return res.json({success: false, msg: `Something was wrong` });
+            if (!count) return res.json({success: true, places: null });
+            if (Math.ceil(count/opcPage.perPage) < page ) {
+              page = Math.ceil(count/opcPage.perPage);
+            }
+            return Place.find({ name: regex })
+                   .skip(opcPage.perPage*(page-1))
+                   .limit(opcPage.perPage)
+                   .exec((err, foundPlaces) => {
+                            if(err) return res.json({success: false, msg: `Something was wrong` });
+                            return res.json({success: true, places: foundPlaces, page: page, count: count });
+                        });
+                });
   }
   if(req.query.lat1 && req.query.lat2 && req.query.lng1 && req.query.lng2) {
     return Place.find({
                   lat: { $gt: req.query.lat1, $lt: req.query.lat2 },
                   lng: { $gt: req.query.lng1, $lt: req.query.lng2 }
                 }).populate('author.id','activate')
-                .populate('comments').exec(
+                .exec(
                   (err,places) => {
                   if(err) return res.json({success: false, msg: `Something was wrong` });
                   if(!places) return res.json({success: true, places: null});

@@ -24,6 +24,7 @@ const resetRoutes = require('./routes/resetPassword');
 const registerAdminRoutes = require('./routes/registerAdmin');
 const registerSuperAdminRoutes = require('./routes/registerSuperAdmin');
 const commentRoutes = require('./routes/comment');
+const userRoutes = require('./routes/user');
 
 
 
@@ -82,6 +83,8 @@ app.use('/register', registerRoutes);
 app.use('/register/admin', registerAdminRoutes);
 // Register SuperAdmin route
 app.use('/register/superAdmin', registerSuperAdminRoutes);
+// User routes
+app.use('/user', userRoutes);
 // Login routes
 app.use('', loginRoutes);
 // Reset password routes

@@ -19,8 +19,9 @@ router.post('/login', (req,res) => {
     if (err) return res.json({succes: false, msg: 'Something was wrong'});
     if (!user) return res.json({succes: false, msg: 'User not found'});
     User.comparePassword( password, user.password, (err,isMatch) => {
-      if (err) throw err;
-      if (isMatch && user.activate) {
+      if (err) return res.json({success: false, msg: 'Something was wrong'});
+      if (!user.activate) return res.json({success: false, msg: `This account isn't activate`});
+      if (isMatch) {
         let token = jwt.sign({data: user},config.secret, {
           expiresIn: 86400 // 1 día
         });
