@@ -44,6 +44,8 @@ mongoose.connection.on('error', (err) => {
   console.log(`Connected to database: ${err}`);
   });
 
+mongoose.Promise = global.Promise;
+
 
 const app = express();
 

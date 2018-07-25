@@ -28,14 +28,11 @@ router.post('',passport.authenticate('jwt', {session:false}),
                     emailSenderRegisterAdminRouteCtrl.addTokenAndUser,
                     emailSenderRegisterAdminRouteCtrl.sendEmail,
                     (email,done) => {
-                      res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
-                      done(null,'done')
+                      done(null,email)
                     }
-                  ], (err) => {
-                    if (err) {
-                      res.json({success: false, msg: `Failed generate token`});
-                      return next(err);
-                    }
+                  ], (err,email) => {
+                      if(err) return res.json({success: false, msg: `Failed generate token`});
+                      return res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
                   });
                 }
               }

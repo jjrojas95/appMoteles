@@ -21,7 +21,6 @@ router.post("/",passport.authenticate('jwt', {session:false}),
                 if(!place) return res.json({success:false,msg:`Place doesn't exist`});
                 Comment.create(req.body.comment, (err, comment) => {
                   if(err) return res.json({success:false,msg:`Something was wrong`});
-                  console.log(comment);
                   //add username and id to comment
                   comment.author.id = req.user._id;
                   comment.author.username = req.user.username;
@@ -67,7 +66,8 @@ router.delete("/:comment_id",passport.authenticate('jwt', {session:false}),
                   if(err) return res.json({success:false,msg:`Something was wrong`});
                   Place.findById(req.params.id,(er,foundPlace) => {
                     if(er) return res.json({success:false,msg:`Something was wrong`});
-                    if (foundPlace.comments.indexOf(req.params.comment_id) > -1) {
+                    if(!foundPlace.comments) return res.json({success:true,msg:`Deleted comment`});
+                    if(foundPlace.comments.indexOf(req.params.comment_id) > -1) {
                       foundPlace.comments.splice(foundPlace.comments.indexOf(req.params.comment_id),1);
                       foundPlace.save();
                     }
