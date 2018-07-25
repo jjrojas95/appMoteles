@@ -83,61 +83,41 @@ router.delete('/:user_id',
               passport.authenticate('jwt', {session:false}),
               authCtrl.roleAuthorization(['admin']),
               (req,res) => {
-                return User.findByIdAndRemove(req.params.user_id,
-                                              (err,user) => {
-                                                if(err) return res.json({success: false, msg: `Something was wrong.` });
-                                                if(!user) return res.json({success: false, msg: `User doesn't found` });
-                                                if(!user.place.id) {
-                                                  // moderator or current user acount delete
-                                                  // debo borrar comentarios hechos por ellos
-                                                  return Comment.find({'author.id':req.params.user_id},
-                                                          (er,comments)=>{
-                                                            if(er) return res.json({success: false, msg: `Something was wrong.` });
-                                                            comments.forEach( (comment,index,commentsArray) => {
-                                                              Place.findOneAndUpdate({comments: comment._id},
-                                                                                     {$pull: { comments: comment._id}},
-                                                                                     (error,foundPlace)=>{
-                                                                if(error) return res.json({success: false, msg: `Something was wrong.` });
-                                                                comment.remove();
-                                                                if (index == commentsArray.length - 1 ) return res.json({success:true});
-                                                              });
-                                                            });
-                                                          });
-                                                }
-                                                if(user.place.id) {
-                                                  // adminPlace user delete
-                                                  let promise =  Place.findById(user.place.id);
-                                                  return promise
-                                                  .then((foundPlace) => {
-                                                    if(!foundPlace.comments) return foundPlace.remove();
-                                                    console.log(foundPlace.comments);
-                                                    foundPlace.comments.forEach((comment,index,commentsArray) => {
-                                                      Comment.findByIdAndRemove(comment,(err,foundComment)=>{
-                                                        if(err) return res.json({success: false, msg: `Something was wrong.` });
-                                                        if (index == commentsArray.length - 1 ) return foundPlace.remove();
-                                                      });
-                                                    });
-                                                  })
-                                                  .then(() => {
-                                                    Comment.find({'author.id':req.params.user_id},
-                                                            (er,comments)=>{
-                                                              if(er) return res.json({success: false, msg: `Something was wrong.` });
-                                                              comments.forEach( (comment,index,commentsArray) => {
-                                                                Place.findOneAndUpdate({comments: comment._id},
-                                                                                       {$pull: { comments: comment._id}},
-                                                                                       (error,foundPlace)=>{
-                                                                  if(error) return res.json({success: false, msg: `Something was wrong.` });
-                                                                  comment.remove();
-                                                                  if (index == commentsArray.length - 1 ) return res.json({success:true});
-                                                                });
-                                                              });
-                                                            });
-                                                  })
-                                                  .catch((er) => {
-                                                    if(er) return res.json({success: false, msg: `Something was wrong.` });
-                                                  });
-                                                }
-                                              });
+                let commentFindPromises = Comment.find({'author.id':req.params.user_id}).exec();
+                return commentFindPromises
+                       .then((comments) => {
+                         if(!comments.legth) return User.findById(req.params.user_id);
+                         comments.forEach((comment,index,commentsArray) => {
+                           Place.findOneAndUpdate({comments: comment._id},
+                                                  {$pull: { comments: comment._id}},
+                                                  (error,foundPlace)=>{
+                             if(error) return res.json({success: false, msg: `Something was wrong` });
+                             comment.remove();
+                           });
+                         });
+                         return User.findById(req.params.user_id)
+                       })
+                       .then((user)=>{
+                         if(user.place.id){
+                           Place.findById(user.place.id,(er,foundPlace)=>{
+                             if(!foundPlace.comments) return foundPlace.remove();
+                             foundPlace.comments.forEach((comment,index,commentsArray) => {
+                               Comment.findByIdAndRemove(comment,(err,foundComment)=>{
+                                 if(err) return res.json({success: false, msg: `Something was wrong...` });
+                                 if (index == commentsArray.length - 1 ) return foundPlace.remove();
+                               });
+                             });
+                           });
+                         }
+                       })
+                       .then(()=>{
+                         return User.findByIdAndRemove(req.params.user_id)
+                       })
+                       .then((user)=>{
+                         if(!user) return res.json({success: false, msg: `Something was wrong..` });
+                         return res.json({success:true});
+                       })
+                       .catch((err) => {return res.json({success: false, msg: `Something was wrong.` });});
 });
 
 module.exports = router;
