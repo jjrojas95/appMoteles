@@ -91,19 +91,20 @@ router.delete('/:user_id',
                            Place.findOneAndUpdate({comments: comment._id},
                                                   {$pull: { comments: comment._id}},
                                                   (error,foundPlace)=>{
-                             if(error) return res.json({success: false, msg: `Something was wrong` });
+                             if(error) return res.json({success: false, msg: `Something was wrong.` });
                              comment.remove();
                            });
                          });
                          return User.findById(req.params.user_id)
                        })
                        .then((user)=>{
+                         if(!user) return res.json({success: false, msg: `Something was wrong.` });
                          if(user.place.id){
                            Place.findById(user.place.id,(er,foundPlace)=>{
                              if(!foundPlace.comments) return foundPlace.remove();
                              foundPlace.comments.forEach((comment,index,commentsArray) => {
                                Comment.findByIdAndRemove(comment,(err,foundComment)=>{
-                                 if(err) return res.json({success: false, msg: `Something was wrong...` });
+                                 if(err) return res.json({success: false, msg: `Something was wrong.` });
                                  if (index == commentsArray.length - 1 ) return foundPlace.remove();
                                });
                              });
@@ -114,7 +115,7 @@ router.delete('/:user_id',
                          return User.findByIdAndRemove(req.params.user_id)
                        })
                        .then((user)=>{
-                         if(!user) return res.json({success: false, msg: `Something was wrong..` });
+                         if(!user) return res.json({success: false, msg: `Something was wrong.` });
                          return res.json({success:true});
                        })
                        .catch((err) => {return res.json({success: false, msg: `Something was wrong.` });});
