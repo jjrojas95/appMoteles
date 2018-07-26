@@ -25,6 +25,7 @@ const registerAdminRoutes = require('./routes/registerAdmin');
 const registerSuperAdminRoutes = require('./routes/registerSuperAdmin');
 const commentRoutes = require('./routes/comment');
 const userRoutes = require('./routes/user');
+const userComponentsVerifyRoutes = require('./routes/usernameAndEmailVerify');
 
 
 
@@ -87,19 +88,14 @@ app.use('/register/admin', registerAdminRoutes);
 app.use('/register/superAdmin', registerSuperAdminRoutes);
 // User routes
 app.use('/user', userRoutes);
+// user components verify route
+app.use('/user/verify', userComponentsVerifyRoutes);
 // Login routes
 app.use('', loginRoutes);
 // Reset password routes
 app.use('/reset', resetRoutes);
 
 
-
-
-
-// Index route
-app.get('/',(req,res) => {
-  res.send('QUESO!!!');
-});
 
 // Inicio servidor
 app.listen(port, ip, () => {
