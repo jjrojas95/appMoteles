@@ -86,7 +86,7 @@ router.delete('/:user_id',
                 let commentFindPromises = Comment.find({'author.id':req.params.user_id}).exec();
                 return commentFindPromises
                        .then((comments) => {
-                         if(!comments.legth) return User.findById(req.params.user_id);
+                         if(comments.length == 0) return User.findById(req.params.user_id);
                          comments.forEach((comment,index,commentsArray) => {
                            Place.findOneAndUpdate({comments: comment._id},
                                                   {$pull: { comments: comment._id}},
@@ -97,18 +97,21 @@ router.delete('/:user_id',
                          });
                          return User.findById(req.params.user_id)
                        })
-                       .then((user)=>{
+                       .then((user) => {
                          if(!user) return res.json({success: false, msg: `Something was wrong.` });
-                         if(user.place.id){
-                           Place.findById(user.place.id,(er,foundPlace)=>{
-                             if(!foundPlace.comments) return foundPlace.remove();
-                             foundPlace.comments.forEach((comment,index,commentsArray) => {
-                               Comment.findByIdAndRemove(comment,(err,foundComment)=>{
-                                 if(err) return res.json({success: false, msg: `Something was wrong.` });
-                                 if (index == commentsArray.length - 1 ) return foundPlace.remove();
-                               });
-                             });
-                           });
+                         if(user.place.id) {
+                           return Place.findById(user.place.id);
+                         }
+                       })
+                       .then((foundPlace)=>{
+                         if(foundPlace){
+                           if(!foundPlace.comments) return foundPlace.remove();
+                           foundPlace.comments.forEach((comment,index,commentsArray) => {
+                             Comment.findByIdAndRemove(comment,(err,foundComment)=>{
+                              if(err) return res.json({success: false, msg: `Something was wrong.` });
+                              if (index == commentsArray.length - 1 ) return foundPlace.remove();
+                            });
+                          });
                          }
                        })
                        .then(()=>{

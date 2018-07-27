@@ -31,7 +31,12 @@ router.post('',passport.authenticate('jwt', {session:false}),
                       done(null,email)
                     }
                   ], (err,email) => {
-                      if(err) return res.json({success: false, msg: `Failed generate token`});
+                      if(err) {
+                        let unique = {};
+                        unique.username = err.errors.username? false : true;
+                        unique.email = err.errors.email? false : true;
+                        return res.json({success: false, msg: `Failed generate token`,unique: unique});
+                      }
                       return res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
                   });
                 }
