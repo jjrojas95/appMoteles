@@ -24,7 +24,7 @@ router.post('',passport.authenticate('jwt', {session:false}),
               } else {
                 if(req.body.adminPlace || req.body.moderator) {
                   async.waterfall([
-                    emailSenderRegisterAdminRouteCtrl.generatePassAndToken(req),
+                    emailSenderRegisterAdminRouteCtrl.generatePassAndToken(req,req.query.host),
                     emailSenderRegisterAdminRouteCtrl.addTokenAndUser,
                     emailSenderRegisterAdminRouteCtrl.sendEmail,
                     (email,done) => {
@@ -50,7 +50,7 @@ router.get('/:token', (req,res) => {
       if(!user.place.firstGenerate) return res.json({success: false, msg: `you will use this token, edit in your profile`});
       if ( new Date(user.emailAuthExpires) < Date.now() ) {
         async.waterfall([
-          emailSenderCtrl.generateTokenWhenExpire(user,req),
+          emailSenderCtrl.generateTokenWhenExpire(user,req,req.query.host),
           emailSenderCtrl.updatedTokenAndExpire,
           emailSenderCtrl.sendNewTokenAdminRoute,
           function(email,done) {

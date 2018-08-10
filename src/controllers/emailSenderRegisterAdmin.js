@@ -7,12 +7,12 @@ const User = require('../models/user');
 
 module.exports = emailSenderRegisterAdminRouteCtrl;
 
-module.exports.generatePassAndToken = (req) => {
+module.exports.generatePassAndToken = (req,host) => {
   return (done) => {
     crypto.randomBytes(20, function(err, buf) {
       let token = buf.toString('hex');
       let request = req.body;
-      request.host = req.headers.host;
+      request.host = host;
       request.token = token;
       crypto.randomBytes(4,(err,buf2) => {
         request.password = buf2.toString('hex').toString();

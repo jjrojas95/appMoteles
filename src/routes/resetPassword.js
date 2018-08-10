@@ -19,7 +19,7 @@ router.post('',(req,res) => {
       return res.json({success: false, msg: `User doesn't exist`});
     } else {
       async.waterfall([
-        emailSenderCtrl.generateTokenWhenExpire(user,req),
+        emailSenderCtrl.generateTokenWhenExpire(user,req,req.query.host),
         emailSenderCtrl.updatedResetTokenAndExpire,
         emailSenderCtrl.sendResetToken,
         function(email,done) {

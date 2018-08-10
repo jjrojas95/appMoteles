@@ -24,7 +24,7 @@ router.post('', (req,res) => {
               } else {
                 if(req.body.secret == config.secret) {
                   async.waterfall([
-                    emailSenderRegisterAdminRouteCtrl.generatePassAndToken(req),
+                    emailSenderRegisterAdminRouteCtrl.generatePassAndToken(req,req.query.host),
                     emailSenderRegisterAdminRouteCtrl.addTokenAndAdminRole,
                     emailSenderRegisterAdminRouteCtrl.sendEmailAdmin,
                     (email,done) => {
@@ -53,7 +53,7 @@ router.get('/:token', (req,res) => {
       }
       if ( new Date(user.emailAuthExpires) < Date.now() ) {
         async.waterfall([
-          emailSenderCtrl.generateTokenWhenExpire(user,req),
+          emailSenderCtrl.generateTokenWhenExpire(user,req,req.query.host),
           emailSenderCtrl.updatedTokenAndExpire,
           emailSenderCtrl.sendNewTokenAdminRoute,
           function(email,done) {

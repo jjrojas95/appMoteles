@@ -12,15 +12,14 @@ const User = require('../models/user');
 
 
 router.post('/login', (req,res) => {
-  let email = req.body.email;
-  let password = req.body.password;
-
+  let email = req.body.email == undefined? '':req.body.email;
+  let password = req.body.password == undefined? '':req.body.password;
   User.getUserByEmail(email, (err,user) => {
-    if (err) return res.json({succes: false, msg: 'Something was wrong'});
-    if (!user) return res.json({succes: false, msg: 'User not found'});
+    if (err) return res.json({succes: false, msg: 'Algo falló, por favor intente de nuevo mas tarde o comuníquese con nosotros'});
+    if (!user) return res.json({succes: false, msg: 'Este usuario no existe'});
     User.comparePassword( password, user.password, (err,isMatch) => {
-      if (err) return res.json({success: false, msg: 'Something was wrong'});
-      if (!user.activate) return res.json({success: false, msg: `This account isn't activate`});
+      if (err) return res.json({success: false, msg: 'Algo falló, por favor intente de nuevo mas tarde o comuníquese con nosotros'});
+      if (!user.activate) return res.json({success: false, msg: `Esta cuenta no se encuentra activa`});
       if (isMatch) {
         let token = jwt.sign({data: user},config.secret, {
           expiresIn: 86400 // 1 día
@@ -38,7 +37,7 @@ router.post('/login', (req,res) => {
           }
         });
       } else {
-        return res.json({success: false, msg: 'Wrong Password'});
+        return res.json({success: false, msg: 'Password equivocado, intente nuevamente'});
       }
     });
   });

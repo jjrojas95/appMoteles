@@ -18,7 +18,7 @@ const User = require('../models/user');
 router.post('/', (req,res) => {
 
   async.waterfall([
-    emailSenderCtrl.generateToken(req),
+    emailSenderCtrl.generateToken(req,req.query.host),
     emailSenderCtrl.addTokenAndUser,
     emailSenderCtrl.sendEmail,
     function(email,done) {
@@ -39,23 +39,23 @@ router.post('/', (req,res) => {
 router.get('/:token', (req, res) => {
 
   User.findOne({ emailAuthToken: req.params.token }, (err, user) => {
-    if (!user) return res.json({success: false, msg: `User doesn't exist`});
-    if (use.role !== 'currentUser') return res.json({success: false, msg: `you can't use this route for activate this tipe of count`});
+    if (!user) return res.json({success: false, msg: `Algo falló, por favor intente de nuevo mas tarde o comuníquese con nosotros`});
+    if (user.role !== 'currentUser') return res.json({success: false, msg: `Esta dirección URL no activa este tipo de cuentas`});
     if ( new Date(user.emailAuthExpires) < Date.now() ) {
       async.waterfall([
-        emailSenderCtrl.generateTokenWhenExpire(user,req),
+        emailSenderCtrl.generateTokenWhenExpire(user,req,req.query.host),
         emailSenderCtrl.updatedTokenAndExpire,
         emailSenderCtrl.sendNewToken,
         function(email,done) {
           done(null,email)
         }
       ], function(err,email) {
-        if (err) return res.json({success: false, msg: `Failed generate token`});
-        return res.json({success: true, msg: `An e-mail has been sent to ${email} with further instructions.`});
+        if (err) return res.json({success: false, msg: `Esta dirección URL expriró, existe un fallo al generar una nueva, favor comuniquese con nosotros`});
+        return res.json({success: true, msg: `Un email fue enviado a ${email} con instrucciones para activar su cuenta`});
       });
     } else {
       User.findByIdAndUpdate(user._id, {activate: true}, (err, updateUser) => {
-        return res.json({success: true, msg: `Activate Count`});
+        return res.json({success: true, msg: `Cuenta activada! Bienvenido`});
       });
     }
 

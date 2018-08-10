@@ -7,12 +7,12 @@ const User = require('../models/user');
 
 module.exports = emailSenderCtrl;
 
-module.exports.generateToken = (req) => {
+module.exports.generateToken = (req,host) => {
   return (done) => {
     crypto.randomBytes(20, function(err, buf) {
       var token = buf.toString('hex');
       var request = req.body;
-      request.host = req.headers.host;
+      request.host = host;
       request.token = token;
       done(err,request);
     });
@@ -57,11 +57,10 @@ module.exports.sendEmail = (user,host,done) => {
     });
 };
 
-module.exports.generateTokenWhenExpire = (user,req) => {
+module.exports.generateTokenWhenExpire = (user,req,host) => {
   return (done) => {
     crypto.randomBytes(20, function(err, buf) {
       var token = buf.toString('hex');
-      var host = req.headers.host;
       done(err,token,user,host);
     });
   }
